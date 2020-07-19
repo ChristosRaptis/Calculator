@@ -329,16 +329,22 @@ function decimalsLength(number1, number2) {
     }    
     if (decimalNumber2 > 16) {
         decimalNumber2 = 16;
-    }
-    
+    }    
     return Math.max(decimalNumber1, decimalNumber2);
-
 }
 
-// Corrects floating point rounding errors 
+// Corrects floating point rounding errors and converts long numbers 
+// to their exponential form
 function decimalsRound(calculation, decimals) {
-    return calculation.toFixed(decimals);
-}   
+    let result = calculation.toFixed(decimals);
+   
+    if (result.length > 22){
+       return Number(result).toExponential();
+   }else {
+       return result;
+   }
+    
+} 
 
 function thousandSeparator(number) {
     let arr = number.split(".");
