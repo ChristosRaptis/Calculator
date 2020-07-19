@@ -338,7 +338,7 @@ function decimalsLength(number1, number2) {
 function decimalsRound(calculation, decimals) {
     let result = calculation.toFixed(decimals);
    
-    if (result.length > 22){
+    if (result.length > 18){
        return Number(result).toExponential();
    }else {
        return result;
