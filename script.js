@@ -50,8 +50,10 @@ equals.addEventListener("click", () => {
     disableEquals();
     equalsToggle = true;
     dot.disabled = false;
-    if (result === "CANNOT DIVIDE BY ZERO, click Clear") {
-        zeroDivision();
+    if (result === "Cannot Divide By Zero") {
+        setTimeout(() => {
+            reset();
+        }, 1000); 
     }
 })
 
@@ -199,7 +201,8 @@ function clickOperator(operation, display) {
 function check() {
     if (firstNumber === true){
         firstOperand = buffer;
-        history.innerHTML += thousandSeparator(firstOperand);
+        //trimZeros(firstOperand);
+        history.innerHTML += trimZeros(thousandSeparator(firstOperand));
         buffer = "";
     }else if (firstNumber === false) {
         secondOperand = buffer;
@@ -209,14 +212,16 @@ function check() {
         resultDisplay.innerHTML = thousandSeparator(result);
         firstOperand = result;
         buffer = "";
-        history.innerHTML += thousandSeparator(secondOperand);
+        history.innerHTML += trimZeros(thousandSeparator(secondOperand));
         secondOperand = "";
         if( equalsToggle === true) {
             history.innerHTML = thousandSeparator(result);
             equalsToggle = false;
         }
-        if (result === "CANNOT DIVIDE BY ZERO, click Clear") {
-            zeroDivision(); 
+        if (result === "Cannot Divide By Zero") {
+            setTimeout(() => {
+                reset();
+            }, 1000); 
         }
     }
 }
@@ -239,18 +244,6 @@ function disableEquals() {
     }
 }
 
-function zeroDivision() {
-    for (let number of numbers){
-        number.disabled = true;
-    }
-    for (let oper of operators){
-        oper.disabled = true;
-    }
-    equals.disabled = true;
-    dot.disabled = true;
-    back.disabled = true;
-}
-
 function reset() {
     firstOperand = "";
     secondOperand = "";
@@ -265,7 +258,7 @@ function reset() {
         number.disabled = false;
     }
     for (let oper of operators){
-        oper.disabled = false;
+        oper.disabled = true;
     }
     dot.disabled = false;
     back.disabled = false;
@@ -275,69 +268,60 @@ function reset() {
 function operate(firstOperand, secondOperand, operator) {
     numb1 = Number(firstOperand);
     numb2 = Number(secondOperand);
-    let decimals = decimalsLength(numb1, numb2);
+    let decimals = maxDecimal(numb1, numb2);
     switch (operator) {
         case "add":
             if (decimals === 0) {
-                decimals = decimalsLength((numb1 + numb2), 0);
+                decimals = maxDecimal((numb1 + numb2), 0);
             }
             
             return decimalsRound((numb1 + numb2), decimals);
             break;
         case "subtract":
             if (decimals === 0) {
-                decimals = decimalsLength((numb1 - numb2), 0);
+                decimals = maxDecimal((numb1 - numb2), 0);
             }
             return decimalsRound((numb1 - numb2), decimals);
             break;
         case "multiply":
             if (decimals === 0) {
-                decimals = decimalsLength((numb1 * numb2), 0);
+                decimals = maxDecimal((numb1 * numb2), 0);
             }
             return decimalsRound((numb1 * numb2), decimals);
             break;
         case "divide":
             if (decimals === 0) {
-                decimals = decimalsLength((numb1 / numb2), 0);
+                decimals = maxDecimal((numb1 / numb2), 0);
             }
-            return numb2 !== 0 ? decimalsRound((numb1 / numb2), decimals) : "CANNOT DIVIDE BY ZERO, click Clear";
+            return numb2 !== 0 ? decimalsRound((numb1 / numb2), decimals) : "Cannot Divide By Zero";
             break;    
     }
 }
 
-// Calculates which number has the most decimal places
-function decimalsLength(number1, number2) {
-    number1 = number1.toString();
-    let arr1 = number1.split(".");
-    let decimalNumber1 = 0;
-    if (arr1.length === 1) {
-        decimalNumber1 = 0;
-    }else {
-        decimalNumber1 = arr1[1].length;
-    }    
-    if (decimalNumber1 > 16) {
-        decimalNumber1 = 16;
-    }
-    
-   number2 =number2.toString();
-    let arr2 =number2.split(".");
-    let decimalNumber2 = 0;
-    if (arr2.length === 1) {
-        decimalNumber2 = 0;
-    }else {
-        decimalNumber2 = arr2[1].length;
-    }    
-    if (decimalNumber2 > 16) {
-        decimalNumber2 = 16;
-    }    
-    return Math.max(decimalNumber1, decimalNumber2);
+function maxDecimal(number1, number2) {
+    return Math.max(decimalPlaces(number1), decimalPlaces(number2));
 }
 
-// Corrects floating point rounding errors and converts long numbers 
-// to their exponential form
+// Calculates the decimal places of a number
+function decimalPlaces(number) {
+    number = number.toString();
+        let arr = number.split(".");
+        let decimalNumber = 0;
+        if (arr.length === 1) {
+            decimalNumber = 0;
+        }else {
+            decimalNumber = arr[1].length;
+        }    
+        if (decimalNumber > 16) {
+            decimalNumber = 16;
+        }
+        return decimalNumber;
+} 
+
+// Corrects floating point rounding errors and  
+// converts long numbers to their exponential form
 function decimalsRound(calculation, decimals) {
     let result = calculation.toFixed(decimals);
-   
     if (result.length > 18){
        return Number(result).toExponential();
    }else {
@@ -356,6 +340,21 @@ function thousandSeparator(number) {
     }     
 }
 
-
+// Removes uncessary user entered zeros after the decimal point
+function trimZeros(number) {
+    let arr = number.split(".");
+    if (arr.length === 1) {
+        return arr.join(".");
+    }else if (arr.length === 2) {
+        let len = arr[1].length;
+        for (let i = 0; i < len; i++){
+            if (arr[1][len -1 - i] === "0"){
+                arr[1] = arr[1].slice(0,-1);
+            }
+        }
+        return arr.join(".");
+    }    
+    
+}   
 
 
